@@ -86,12 +86,52 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: get this from hw1
-        return action
+      with torch.no_grad():
+        obs = np.asarray(obs)
+        if len(obs.shape) > 1:
+            observation = obs
+        else:
+            observation = obs[None]
+
+        # Done todo return the action that the policy prescribes
+        if self.discrete: 
+          possible_actions = self.logits_na(observation)
+          action_to_take = torch.argmax(possible_actions, dim=-1)
+          return action_to_take
+        else: 
+          obs = ptu.from_numpy(obs)
+          pred_mu = self.mean_net(obs)
+          std = torch.exp(self.logstd)
+          eps = torch.randn_like(pred_mu)
+          pred = pred_mu + eps*std
+          # print(pred.shape)
+          return ptu.to_numpy(pred)
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
-        raise NotImplementedError
+      # this was a todo. 
+      if self.discrete: 
+        # update that network .
+        self.optimizer.zero_grad()
+
+        pred = self.logits_na(observations)
+        loss = F.cross_entropy(pred, actions)
+        loss.backward()
+        self.optimizer.step()
+
+      else: 
+        self.optimizer.zero_grad()
+        pred_mu = self.mean_net(observations)
+        # pred_logstd = self.logstd(observations)
+        std = torch.exp(self.logstd)
+        eps = torch.randn_like(pred_mu)
+        pred = pred_mu + eps*std
+        loss = F.MSELoss(pred, actions)
+        loss.backward()
+        self.optimizer.step()
+        # update mean and std. 
+        
+      return loss.detach().cpu()
 
     # This function defines the forward pass of the network.
     # You can return anything you want, but you should be able to differentiate
@@ -99,7 +139,16 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor):
-        # TODO: get this from hw1
+      # observation = torch.from_numpy(observation).float().to(ptu.device)
+      if self.discrete: 
+        return self.logits_na(observation)
+      else: 
+        pred_mu = self.mean_net(observation)
+        std = torch.exp(self.logstd)
+        eps = torch.randn_like(pred_mu)
+        pred = pred_mu + eps*std
+        return pred
+
         return action_distribution
 
 
