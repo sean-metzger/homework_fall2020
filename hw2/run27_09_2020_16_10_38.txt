@@ -1,0 +1,44 @@
+-sh: 1: source: not found
+time(seconds)        unlimited
+file(blocks)         unlimited
+data(kbytes)         unlimited
+stack(kbytes)        unlimited
+coredump(blocks)     unlimited
+memory(kbytes)       unlimited
+locked memory(kbytes) 64
+process              1542204
+nofiles              1024
+vmemory(kbytes)      78000000
+locks                unlimited
+rtprio               0
+/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/policies/MLP_policy.py:101: UserWarning: Implicit dimension choice for softmax has been deprecated. Change the call to include dim=X as an argument.
+  probs = F.softmax(possible_actions)
+########################
+logging outputs to  /userdata/smetzger/cs285/homework_fall2020/hw2/cs285/scripts/../../data/q1_lb_rtg_na_CartPole-v0_27-09-2020_16-11-48
+########################
+Using GPU id 0
+
+
+********** Iteration 0 ************
+
+Collecting data to be used for training...
+batch size 5000
+N PATHS 196
+
+Training agent using sampled data from replay buffer...
+Traceback (most recent call last):
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/scripts/run_hw2.py", line 115, in <module>
+    main()
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/scripts/run_hw2.py", line 111, in main
+    trainer.run_training_loop()
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/scripts/run_hw2.py", line 50, in run_training_loop
+    eval_policy = self.rl_trainer.agent.actor,
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/infrastructure/rl_trainer.py", line 138, in run_training_loop
+    train_logs = self.train_agent()
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/infrastructure/rl_trainer.py", line 198, in train_agent
+    train_log = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/agents/pg_agent.py", line 45, in train
+    advantages = self.estimate_advantage(observations, q_values)
+  File "/userdata/smetzger/cs285/homework_fall2020/hw2/cs285/agents/pg_agent.py", line 105, in estimate_advantage
+    advantages = utils.normalize(advantages)
+TypeError: normalize() missing 2 required positional arguments: 'mean' and 'std'
