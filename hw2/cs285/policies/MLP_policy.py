@@ -98,8 +98,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             if self.discrete: 
                 observation = ptu.from_numpy(obs)
                 possible_actions = self.logits_na(observation)
-                probs = F.softmax(possible_actions)
-                m = torch.distributions.categorical.Categorical(probs)
+                m = torch.distributions.categorical.Categorical(logits=possible_actions)
                 action_to_take = m.sample()
                 return ptu.to_numpy(action_to_take)
             else: 
@@ -147,7 +146,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
       # observation = torch.from_numpy(observation).float().to(ptu.device)
         if self.discrete: 
             logits = self.logits_na(observation)
-            action_distribution = torch.distributions.categorical.Categorical(F.softmax(logits))
+            action_distribution = torch.distributions.categorical.Categorical(logits=logits)
             return action_distribution
         else: 
             pred_mu = self.mean_net(observation)
