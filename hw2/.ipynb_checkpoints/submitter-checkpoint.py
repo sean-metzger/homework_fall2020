@@ -9,13 +9,16 @@ from datetime import datetime
 now = datetime.now()
 
 
-bs  = [100]
-lrs = [1,10]
+bs  = [10000, 30000, 50000]
+lrs = [0.005, 0.01, 0.02]
 for batch in bs: 
     for lr in lrs: 
-        cs285_command = ('python cs285/scripts/run_hw2.py --env_name InvertedPendulum-v2 \
-        --ep_len 1000 --discount 0.9 -n 100 -l 2 -s 64 -b %d -lr %.5f -rtg \
-        --exp_name q2_b%d_r%.5f' %(batch, lr, batch, lr))
+#         cs285_command = ('python cs285/scripts/run_hw2.py --env_name InvertedPendulum-v2 \
+#         --ep_len 1000 --discount 0.9 -n 100 -l 2 -s 64 -b %d -lr %.5f -rtg \
+#         --exp_name q2_b%d_r%.5f' %(batch, lr, batch, lr))
+        cs285_command = ('python cs285/scripts/run_hw2.py --env_name HalfCheetah-v2 --ep_len 150 \
+--discount 0.95 -n 100 -l 2 -s 32 -b %d -lr %.4f -rtg --nn_baseline \
+--exp_name q4_search_b%d_lr%.4f_rtg_nnbaseline' %(batch, lr, batch, lr))
 
         print('command', cs285_command)
         basedir = '/userdata/smetzger/cs285/homework_fall2020/hw2/'

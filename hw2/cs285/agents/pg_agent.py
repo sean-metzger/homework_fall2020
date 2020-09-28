@@ -102,9 +102,9 @@ class PGAgent(BaseAgent):
             ## TODO: standardize the advantages to have a mean of zero
             ## and a standard deviation of one
             ## HINT: there is a `normalize` function in `infrastructure.utils`
-            print('normalizing adv')
+#             print('normalizing adv')
             advantages = utils.normalize(advantages, np.mean(advantages), np.std(advantages))
-        print('mua', np.mean(advantages), 'stda', np.std(advantages))
+#         print('mua', np.mean(advantages), 'stda', np.std(advantages))
         return advantages
 
     #####################################################
@@ -161,7 +161,7 @@ class PGAgent(BaseAgent):
             gamma_vec = np.arange(T-t)
             gamma_rep = np.ones(T-t)*self.gamma
             gamma_vec = np.power(gamma_rep, gamma_vec)
-            res = np.sum(np.array(rewards[t:])*gamma_vec)
+            res = np.sum(gamma_vec*rewards[t:])
             list_of_discounted_returns.append(res)
         
         list_of_discounted_cumsums = list_of_discounted_returns
