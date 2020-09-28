@@ -84,34 +84,30 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     ##################################
 
-    # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        with torch.no_grad():
-            obs = np.asarray(obs)
-            if len(obs.shape) > 1:
-                observation = obs
-            else:
-                observation = obs[None]
+#         with torch.no_grad():
+        obs = np.asarray(obs)
+        if len(obs.shape) > 1:
+            observation = obs
+        else:
+            observation = obs[None]
 
-            # Done todo return the action that the policy prescribes
+        # Done todo return the action that the policy prescribes
 #             print('selfdiscrete', self.discrete)
-            if self.discrete: 
-                observation = ptu.from_numpy(obs)
-                possible_actions = self.logits_na(observation)
-                probs = F.softmax(possible_actions)
-                # this should probably be categorical -> sampled .
-#                 print(probs.shape)
-                m = torch.distributions.categorical.Categorical(probs)
-                action_to_take = m.sample()
-                return ptu.to_numpy(action_to_take)
-            else: 
-                obs = ptu.from_numpy(obs)
-                pred_mu = self.mean_net(obs)
-                std = torch.exp(self.logstd)
-                eps = torch.randn_like(pred_mu)
-                pred = pred_mu + eps*std
-                # print(pred.shape)
-                return ptu.to_numpy(pred)
+        if self.discrete: 
+            observation = ptu.from_numpy(obs)
+            possible_actions = self.logits_na(observation)
+            probs = F.softmax(possible_actions)
+            m = torch.distributions.categorical.Categorical(probs)
+            action_to_take = m.sample()
+            return ptu.to_numpy(action_to_take)
+        else: 
+            obs = ptu.from_numpy(obs)
+            pred_mu = self.mean_net(obs)
+            std = torch.exp(self.logstd)
+            eps = torch.randn_like(pred_mu)
+            pred = pred_mu + eps*std
+            return ptu.to_numpy(pred)
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -153,8 +149,8 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         else: 
             pred_mu = self.mean_net(observation)
             std = torch.exp(self.logstd)
-            action_distribution = torch.distributions.normal.Normal(pred_mu, std)
-            return action_distribution
+            mvn = distributions.MultivariateNormal(pred_mu, scale_tril=torch.diag(std))
+            return mvn
 
 
 #####################################################
@@ -179,12 +175,11 @@ class MLPPolicyPG(MLPPolicy):
             # by the `forward` method
         # HINT3: don't forget that `optimizer.step()` MINIMIZES a loss
         
-        distribution = self.forward(observations)
-        loss = -1*torch.mean(distribution.log_prob(actions)*advantages)
-
-        # TODO: optimize `loss` using `self.optimizer`
-        # HINT: remember to `zero_grad` first
+        
+        
         self.optimizer.zero_grad()
+        distribution = self.forward(observations)
+        loss = -1*(distribution.log_prob(actions)*advantages).mean()
         loss.backward()
         self.optimizer.step()
 
