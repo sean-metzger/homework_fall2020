@@ -31,7 +31,7 @@ class PGAgent(BaseAgent):
         # replay buffer
         self.replay_buffer = ReplayBuffer(1000000)
 
-    def train(self, observations, actions, rewards_list, next_observations, terminals):
+    def train(self, observations, actions, rewards_list, next_observations, terminals, steps=1):
 
         """
             Training a PG agent refers to updating its actor using the given observations/actions
@@ -46,7 +46,7 @@ class PGAgent(BaseAgent):
 
         # TODO: step 3: use all datapoints (s_t, a_t, q_t, adv_t) to update the PG actor/policy
         ## HINT: `train_log` should be returned by your actor update method
-        train_log = self.actor.update(observations, actions, advantages, q_values=q_values)
+        train_log = self.actor.update(observations, actions, advantages, q_values=q_values, steps=steps)
 
         return train_log
 

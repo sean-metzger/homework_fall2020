@@ -181,7 +181,7 @@ class MLPPolicyPG(MLPPolicy):
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
         self.baseline_loss = nn.MSELoss()
 
-    def update(self, observations, actions, advantages, q_values=None):
+    def update(self, observations, actions, advantages, q_values=None, steps=1):
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
@@ -195,12 +195,13 @@ class MLPPolicyPG(MLPPolicy):
         # HINT3: don't forget that `optimizer.step()` MINIMIZES a loss
         
         
-        
-        self.optimizer.zero_grad()
-        distribution = self.forward(observations)
-        loss = -1*(distribution.log_prob(actions)*advantages).mean()
-        loss.backward()
-        self.optimizer.step()
+        for step in range(steps):
+            print('step', step)
+            self.optimizer.zero_grad()
+            distribution = self.forward(observations)
+            loss = -1*(distribution.log_prob(actions)*advantages).mean()
+            loss.backward()
+            self.optimizer.step()
 
         if self.nn_baseline:
             ## TODO: normalize the q_values to have a mean of zero and a standard deviation of one

@@ -30,6 +30,8 @@ class RL_Trainer(object):
         self.params = params
         self.logger = Logger(self.params['logdir'])
 
+        self.steps = self.params['steps']
+        print('using steps = ', self.steps)
         # Set random seeds
         seed = self.params['seed']
         np.random.seed(seed)
@@ -168,6 +170,7 @@ class RL_Trainer(object):
         # FOR BATCH SIZE? 
 
         print('batch size', batch_size)
+        
         paths, envsteps_this_batch = utils.sample_trajectories(self.env, self.agent.actor, 
         batch_size, self.params['ep_len'])
 
@@ -177,6 +180,7 @@ class RL_Trainer(object):
         if self.log_video:
             print('\nCollecting train rollouts to be used for saving videos...')
             ## TODO look in utils and implement sample_n_trajectories
+            
             train_video_paths = utils.sample_n_trajectories(self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
         
         return paths, envsteps_this_batch, train_video_paths
@@ -195,7 +199,8 @@ class RL_Trainer(object):
             # done TODO use the sampled data to train an agent
             # HINT: use the agent's train function
             # HINT: keep the agent's training log for debugging
-            train_log = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
+            train_log = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, 
+                                         terminal_batch, self.steps)
             all_logs.append(train_log)
         return all_logs
 
