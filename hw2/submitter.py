@@ -9,16 +9,16 @@ from datetime import datetime
 now = datetime.now()
 
 
-bs  = [1000]
-lrs = [1e-3]
-stepss = [1, 2, 5, 10]
+bs  = [5]
+lrs = [1e-2, 1e-1, 1]
 
+stepss = [1]
 for batch in bs: 
     for lr in lrs: 
         for steps in stepss: 
             cs285_command = ('python cs285/scripts/run_hw2.py --env_name InvertedPendulum-v2 \
-            --ep_len 1000 --discount 0.9 -n 100 -l 2 -s 64 -b %d -lr %.5f --steps %d -rtg \
-            --exp_name q5_steps_%d_bs_%d' %(batch, lr, steps, steps, batch))
+            --ep_len 1000 --discount 0.9 -n 100 -l 2 -s 64 -b %d -lr %.5f -rtg \
+            --exp_name q2_b%d_r%.5f' %(batch, lr, batch, lr))
     #         cs285_command = ('python cs285/scripts/run_hw2.py --env_name HalfCheetah-v2 --ep_len 150 \
     # --discount 0.95 -n 100 -l 2 -s 32 -b %d -lr %.4f -rtg --nn_baseline \
     # --exp_name q4_search_b%d_lr%.4f_rtg_nnbaseline' %(batch, lr, batch, lr))
@@ -75,9 +75,7 @@ for batch in bs:
 # --exp_name q4_b<b*>_r<r*>_rtg_nnbaseline'
 # ]
 # for cs285_command in commands:
-# #         cs285_command = ('python cs285/scripts/run_hw2.py --env_name InvertedPendulum-v2 \
-# #         --ep_len 1000 --discount 0.9 -n 100 -l 2 -s 64 -b %d -lr %.5f -rtg \
-# #         --exp_name q2_b%d_r%.5f' %(batch, lr, batch, lr))
+
 #         cs285_command = cs285_command.replace('<b*>', str(batch))
 #         cs285_command = cs285_command.replace('<r*>', str(lr))
 #         print('command', cs285_command)
