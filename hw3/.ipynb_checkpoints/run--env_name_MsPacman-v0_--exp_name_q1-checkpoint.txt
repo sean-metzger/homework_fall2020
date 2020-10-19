@@ -1,0 +1,26 @@
+-sh: 1: source: not found
+time(seconds)        unlimited
+file(blocks)         unlimited
+data(kbytes)         unlimited
+stack(kbytes)        unlimited
+coredump(blocks)     unlimited
+memory(kbytes)       unlimited
+locked memory(kbytes) 64
+process              1541808
+nofiles              1024
+vmemory(kbytes)      78000000
+locks                unlimited
+rtprio               0
+-sh: 1: source: not found
+time(seconds)        unlimited
+file(blocks)         unlimited
+data(kbytes)         unlimited
+stack(kbytes)        unlimited
+coredump(blocks)     unlimited
+memory(kbytes)       unlimited
+locked memory(kbytes) 64
+process              1541808
+nofiles              1024
+vmemory(kbytes)      78000000
+locks                unlimited
+rtprio               0
