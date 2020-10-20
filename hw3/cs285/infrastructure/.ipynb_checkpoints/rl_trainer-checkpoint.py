@@ -19,6 +19,8 @@ from cs285.infrastructure.dqn_utils import (
         register_custom_envs,
 )
 
+from cs285.infrastructure.dqn_utils import lander_optimizer
+
 # how many rollouts to save as videos to tensorboard
 MAX_NVIDEO = 2
 MAX_VIDEO_LEN = 40 # we overwrite this in the code below
@@ -107,7 +109,13 @@ class RL_Trainer(object):
         #############
 
         agent_class = self.params['agent_class']
-        self.agent = agent_class(self.env, self.params['agent_params'])
+        if 'hparam' in self.params['exp_name']: 
+            print('changing optimizer')
+            self.params['agent_params']['optimizer_spec'] = lander_optimizer(self.params['lr'])
+            print('using lr  = ', self.params['lr'])
+            self.agent = agent_class(self.env, self.params['agent_params'])
+        else: 
+            self.agent = agent_class(self.env, self.params['agent_params'])
 
     def run_training_loop(self, n_iter, collect_policy, eval_policy,
                           initial_expertdata=None, relabel_with_expert=False,

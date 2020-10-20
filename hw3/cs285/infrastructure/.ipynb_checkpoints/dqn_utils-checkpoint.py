@@ -158,13 +158,13 @@ def atari_optimizer(num_timesteps):
     )
 
 
-def lander_optimizer():
+def lander_optimizer(lr_=1e-3):
     return OptimizerSpec(
         constructor=optim.Adam,
         optim_kwargs=dict(
-            lr=1,
+            lr=lr_,
         ),
-        learning_rate_schedule=lambda epoch: 1e-3,  # keep init learning rate
+        learning_rate_schedule=lambda epoch: lr_,  # keep init learning rate
     )
 
 
