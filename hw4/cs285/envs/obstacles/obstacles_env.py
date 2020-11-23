@@ -2,9 +2,13 @@ import gym
 import numpy as np
 from gym import spaces
 
+
+
 class Obstacles(gym.Env):
     def __init__(self, start=[-0.5, 0.75], end=[0.7, -0.8], random_starts=True):
 
+        import matplotlib
+        matplotlib.use('Agg')
         import matplotlib.pyplot as plt #inside, so doesnt get imported when not using this env
         self.plt = plt
 
@@ -100,6 +104,8 @@ class Obstacles(gym.Env):
             r_total: reward of this (o,a) pair, dimension is (batchsize,1) or (1,)
             done: True if env reaches terminal state, dimension is (batchsize,1) or (1,)
         """
+        
+        
 
         #initialize and reshape as needed, for batch mode
         self.reward_dict = {}

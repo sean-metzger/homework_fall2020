@@ -24,32 +24,43 @@ import tensorflow as tf
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--event', help='event file', required=True)
+    parser.add_argument('--events', help='event file', required=True)
+    parser.add_argument('--event', default='ll')
 
     return parser.parse_args()
 
 
 def main(args):
-    out_path = os.path.dirname(args.event) + '_filtered'
-    writer = tf.summary.FileWriter(out_path)
+    
+    for file in os.listdir(args.events):
+        if '.ipynb' in file: continue
+        args.event = os.path.join(args.events, file)
+        for file in os.listdir(args.event): 
+            if 'events' in file: 
+                args.event = os.path.join(args.event, file)
+                break
+        print(args.event)
+    
+        out_path = os.path.dirname(args.event) + '_filtered'
+        writer = tf.summary.FileWriter(out_path)
 
-    total = None
-    for event in tqdm.tqdm(tf.train.summary_iterator(args.event), total=total):
-        event_type = event.WhichOneof('what')
-        if event_type != 'summary':
-            writer.add_event(event)
-        else:
-            wall_time = event.wall_time
-            step = event.step
-            filtered_values = [value for value in event.summary.value if
-                               'rollouts' not in value.tag]
-            summary = tf.Summary(value=filtered_values)
+        total = None
+        for event in tqdm.tqdm(tf.train.summary_iterator(args.event), total=total):
+            event_type = event.WhichOneof('what')
+            if event_type != 'summary':
+                writer.add_event(event)
+            else:
+                wall_time = event.wall_time
+                step = event.step
+                filtered_values = [value for value in event.summary.value if
+                                   'rollouts' not in value.tag]
+                summary = tf.Summary(value=filtered_values)
 
-            filtered_event = tf.summary.Event(summary=summary,
-                                              wall_time=wall_time,
-                                              step=step)
-            writer.add_event(filtered_event)
-    writer.close()
+                filtered_event = tf.summary.Event(summary=summary,
+                                                  wall_time=wall_time,
+                                                  step=step)
+                writer.add_event(filtered_event)
+        writer.close()
     return 0
 
 
