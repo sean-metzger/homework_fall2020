@@ -4,6 +4,8 @@ import torch.optim as optim
 from torch import nn
 import torch
 
+import torch.distributions as dist
+
 def init_method_1(model):
     model.weight.data.uniform_()
     model.bias.data.uniform_()
@@ -13,7 +15,7 @@ def init_method_2(model):
     model.bias.data.normal_()
 
 
-class RNDModel(nn.Module, BaseExplorationModel):
+class PseudoCounts(nn.Module, BaseExplorationModel):
     def __init__(self, hparams, optimizer_spec, **kwargs):
         super().__init__(**kwargs)
         self.ob_dim = hparams['ob_dim']
@@ -31,37 +33,43 @@ class RNDModel(nn.Module, BaseExplorationModel):
         # HINT 1) Check out the method ptu.build_mlp
         # HINT 2) There are two weight init methods defined above
         
-
-        self.f = ptu.build_mlp(input_size=self.ob_dim, 
-                               output_size=self.output_size, 
-                               n_layers= self.n_layers,
-                               size = self.size, 
-                               init_method = init_method_1)
+        n_dist = 4
+        self.n_dist = n_dist
         
-        self.f_hat = ptu.build_mlp(input_size=self.ob_dim, 
-                               output_size=self.output_size, 
-                               n_layers= self.n_layers,
-                               size = self.size, 
-                               init_method = init_method_2)
+    def get_distributions(self): 
         
-        self.optimizer = self.optimizer_spec.constructor(
-            self.f_hat.parameters(),
-            **self.optimizer_spec.optim_kwargs
-        )
-        self.learning_rate_scheduler = optim.lr_scheduler.LambdaLR(
-            self.optimizer,
-            self.optimizer_spec.learning_rate_schedule,
-        )
-
-        self.f.to(ptu.device)
-        self.f_hat.to(ptu.device)
-
+        
     def forward(self, ob_no):
-        # TODO: Get the prediction error for ob_no
-        # HINT: Remember to detach the output of self.f!
-#         error =  torch.sqrt(torch.sum((self.f_hat(ob_no) - self.f(ob_no).detach()).pow(2), dim=1))
-        error = torch.norm(self.f_hat(ob_no) - self.f(ob_no).detach(),dim=-1)
-        return error
+        
+        
+        self.c += ob_no.shape[0]
+        ob_no = ob_no.to(ptu.device)
+        dists, weights = self.get_distributions()
+        log_probs = 0
+            
+        log_probs = torch.sum(torch.log(log_probs + 1e-15), dim=-1)
+        
+            
+        loss = -1*torch.mean(log_probs)
+        
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        
+        dists, weights = self.get_distributions()
+        log_probs_2 = 0
+        for k in range(self.n_dist):
+            log_probs_2 += weights[k]*torch.exp(dists[k].log_prob(ob_no))
+            
+        log_probs_2 = torch.sum(torch.log(log_probs_2 + 1e-15), dim=-1)
+        
+        pg = log_probs_2 - log_probs
+        bonus = 1/(torch.exp(.1*self.c.to(ptu.device).pow(-.5)* nn.functional.relu(pg)) -1)
+        bonus = nn.functional.relu(bonus)
+        bonus = torch.sqrt(bonus)
+        
+        return bonus
 
     def forward_np(self, ob_no):
         ob_no = ptu.from_numpy(ob_no)
@@ -72,6 +80,5 @@ class RNDModel(nn.Module, BaseExplorationModel):
         # TODO: Update f_hat using ob_no
         # Hint: Take the mean prediction error across the batch
         ob_no = ptu.from_numpy(ob_no)
-        loss = self(ob_no)
-        loss = loss.mean()
+        loss = self(ob_no).mean()
         return loss.item()

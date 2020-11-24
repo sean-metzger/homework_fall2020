@@ -265,6 +265,7 @@ class RL_Trainer(object):
         last_log = all_logs[-1]
 
         episode_rewards = get_wrapper_by_name(self.env, "Monitor").get_episode_rewards()
+        print(len(episode_rewards), episode_rewards[-100:])
         if len(episode_rewards) > 0:
             self.mean_episode_reward = np.mean(episode_rewards[-100:])
         if len(episode_rewards) > 100:

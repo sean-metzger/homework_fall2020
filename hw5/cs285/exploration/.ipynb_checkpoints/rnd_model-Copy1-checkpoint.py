@@ -4,6 +4,8 @@ import torch.optim as optim
 from torch import nn
 import torch
 
+import torch.distributions as dist
+
 def init_method_1(model):
     model.weight.data.uniform_()
     model.bias.data.uniform_()
@@ -13,7 +15,7 @@ def init_method_2(model):
     model.bias.data.normal_()
 
 
-class RNDModel(nn.Module, BaseExplorationModel):
+class PseudoCounts(nn.Module, BaseExplorationModel):
     def __init__(self, hparams, optimizer_spec, **kwargs):
         super().__init__(**kwargs)
         self.ob_dim = hparams['ob_dim']
@@ -53,14 +55,21 @@ class RNDModel(nn.Module, BaseExplorationModel):
             self.optimizer_spec.learning_rate_schedule,
         )
 
-        self.f.to(ptu.device)
+        self.f_prime.to(ptu.device)
         self.f_hat.to(ptu.device)
 
     def forward(self, ob_no):
-        # TODO: Get the prediction error for ob_no
-        # HINT: Remember to detach the output of self.f!
-#         error =  torch.sqrt(torch.sum((self.f_hat(ob_no) - self.f(ob_no).detach()).pow(2), dim=1))
-        error = torch.norm(self.f_hat(ob_no) - self.f(ob_no).detach(),dim=-1)
+        params = self.f(ob_no)
+        mu = params[:self.output_size]
+        std = params[self.output_size:]
+        m = dist.normal.Normal(mu, (torch.exp(std)))
+        
+        
+        
+        
+
+    
+        
         return error
 
     def forward_np(self, ob_no):

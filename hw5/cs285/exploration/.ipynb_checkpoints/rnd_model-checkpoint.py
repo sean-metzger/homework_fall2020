@@ -2,7 +2,6 @@ from cs285.infrastructure import pytorch_util as ptu
 from .base_exploration_model import BaseExplorationModel
 import torch.optim as optim
 from torch import nn
-from torch import nn.functional as F
 import torch
 
 def init_method_1(model):
@@ -60,7 +59,8 @@ class RNDModel(nn.Module, BaseExplorationModel):
     def forward(self, ob_no):
         # TODO: Get the prediction error for ob_no
         # HINT: Remember to detach the output of self.f!
-        error =  torch.sqrt((self.f_hat(ob_no) - self.f(ob_no).detach()).pow(2))
+#         error =  torch.sqrt(torch.sum((self.f_hat(ob_no) - self.f(ob_no).detach()).pow(2), dim=1))
+        error = torch.norm(self.f_hat(ob_no) - self.f(ob_no).detach(),dim=-1)
         return error
 
     def forward_np(self, ob_no):
@@ -71,6 +71,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
     def update(self, ob_no):
         # TODO: Update f_hat using ob_no
         # Hint: Take the mean prediction error across the batch
+        ob_no = ptu.from_numpy(ob_no)
         loss = self(ob_no)
         loss = loss.mean()
         return loss.item()
