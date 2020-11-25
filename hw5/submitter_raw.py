@@ -14,7 +14,7 @@ print('command', cs285_command)
 basedir = '/userdata/smetzger/cs285/homework_fall2020/hw5/'
 times= now.strftime("%d_%m_%Y_%H_%M_%S")
  
-filename = basedir + 'runs/run' + ('_').join(cs285_command.split(' ')[2:]) + '.txt'
+filename = basedir + 'runs/sos_' + ('_').join(cs285_command.split(' ')[2:]) + '.txt'
 string = "submit_job -q mind-gpu"
 string += " -m 78 -g 1"
 string += " -o " + filename
